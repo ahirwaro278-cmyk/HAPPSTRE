@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAPPSTRE - Login & Signup</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --secondary: #764ba2;
+      --accent: #ff6b6b;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --gray: #6c757d;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --shadow: 0 10px 25px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      display: flex;
+      max-width: 1000px;
+      width: 100%;
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    
+    .info-panel {
+      flex: 1;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .info-panel h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .info-panel h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .features {
+      list-style: none;
+      margin-top: 30px;
+    }
+    
+    .features li {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .features i {
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+    
+    .login-panel {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+    
+    .logo i {
+      font-size: 2.5rem;
+      color: var(--primary);
+    }
+    
+    .logo h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    
+    .tagline {
+      color: var(--gray);
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .form-group i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn {
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    .btn-google {
+      background-color: white;
+      color: var(--dark);
+      border: 1px solid #ddd;
+    }
+    
+    .btn-google:hover {
+      background-color: #f8f9fa;
+      border-color: #ccc;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-google i {
+      color: #db4437;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+      color: var(--gray);
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #eee;
+      z-index: 1;
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 15px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    .message.success {
+      background-color: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(40, 167, 69, 0.2);
+      display: block;
+    }
+    
+    .message.error {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(220, 53, 69, 0.2);
+      display: block;
+    }
+    
+    .firebase-setup {
+      background-color: #f8f9fa;
+      border-left: 4px solid var(--warning);
+      padding: 15px;
+      margin-top: 30px;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .firebase-setup h4 {
+      color: var(--dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .firebase-setup p {
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    
+    .firebase-setup ol {
+      padding-left: 20px;
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    
+    .firebase-setup li {
+      margin-bottom: 5px;
+    }
+    
+    .firebase-setup code {
+      background-color: #e9ecef;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+    
+    .toggle-form {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+    
+    .toggle-form a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .toggle-form a:hover {
+      text-decoration: underline;
+    }
+    
+    #signupForm {
+      display: none;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .info-panel, .login-panel {
+        padding: 30px;
+      }
+      
+      .info-panel {
+        order: 2;
+      }
+      
+      .login-panel {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Panel - App Info -->
+    <div class="info-panel">
+      <h1><i class="fas fa-mobile-alt"></i> HAPPSTRE</h1>
+      <h2>Your Ultimate Mobile Experience</h2>
+      <p>Connect with your favorite apps, manage your digital life, and explore new possibilities with HAPPSTRE.</p>
+      
+      <ul class="features">
+        <li><i class="fas fa-check-circle"></i> Secure authentication with Firebase</li>
+        <li><i class="fas fa-check-circle"></i> Seamless Google integration</li>
+        <li><i class="fas fa-check-circle"></i> Cross-platform compatibility</li>
+        <li><i class="fas fa-check-circle"></i> Real-time data synchronization</li>
+        <li><i class="fas fa-check-circle"></i> Personalized user experience</li>
+      </ul>
+    </div>
+    
+    <!-- Right Panel - Login/Signup Form -->
+    <div class="login-panel">
+      <div class="logo">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>HAPPSTRE</h2>
+      </div>
+      
+      <!-- Login Form -->
+      <div id="loginForm">
+        <p class="tagline">Sign in to access your personalized dashboard and app management tools.</p>
+        
+        <div class="form-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="loginEmail" class="form-control" placeholder="Email address" required>
+        </div>
+        
+        <div class="form-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
+          <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPassword', this)"></i>
+        </div>
+        
+        <button type="button" class="btn btn-primary" onclick="login()">
+          <i class="fas fa-sign-in-alt"></i> Login to HAPPSTRE
+        </button>
+        
+        <div class="divider">
+          <span>Or continue with</span>
+        </div>
+        
+        <button type="button" class="btn btn-google" onclick="googleLogin()">
+          <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        
+        <div class="toggle-form">
+          Don't have an account? 
+          <a onclick="showSignupForm()">Sign up here</a>
+        </div>
+      </div>
+      
+      <!-- Signup Form -->
+      <div id="signupForm">
+        <p class="tagline">Create your HAPPSTRE account to get started.</p>
+        
+        <div class="form-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="signupName" class="form-control" placeholder="Full Name" required>
+        </div>
+        
+        <div class="form-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="signupEmail" class="form-control" placeholder="Email address" required>
+        </div>
+        
+        <div class="form-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signupPassword" class="form-control" placeholder="Password (min. 6 characters)" required>
+          <i class="fas fa-eye password-toggle" onclick="togglePassword('signupPassword', this)"></i>
+        </div>
+        
+        <div class="form-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+          <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+        </div>
+        
+        <button type="button" class="btn btn-primary" onclick="signup()">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+        
+        <div class="divider">
+          <span>Or sign up with</span>
+        </div>
+        
+        <button type="button" class="btn btn-google" onclick="googleLogin()">
+          <i class="fab fa-google"></i> Sign up with Google
+        </button>
+        
+        <div class="toggle-form">
+          Already have an account? 
+          <a onclick="showLoginForm()">Login here</a>
+        </div>
+      </div>
+      
+      <div id="message" class="message"></div>
+      
+      <!-- Firebase Setup Instructions -->
+      <div class="firebase-setup">
+        <h4><i class="fas fa-cog"></i> Firebase Setup Required</h4>
+        <p>To enable authentication, follow these steps:</p>
+        <ol>
+          <li>Go to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a></li>
+          <li>Create a new project or select existing one</li>
+          <li>Enable Email/Password and Google authentication methods</li>
+          <li>Copy your Firebase config and replace in the code below</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup,
+      updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // 🔹 Firebase Configuration (Replace with your own)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-kkIb4C__asdflkjLSDJFLKJ_sdlkfjsl",
+      authDomain: "happstre-app.firebaseapp.com",
+      projectId: "happstre-app",
+      storageBucket: "happstre-app.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef1234567890"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const messageEl = document.getElementById("message");
+
+    // Password toggle function
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    // Form toggle functions
+    function showSignupForm() {
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("signupForm").style.display = "block";
+      clearMessage();
+    }
+
+    function showLoginForm() {
+      document.getElementById("signupForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+      clearMessage();
+    }
+
+    // Clear message function
+    function clearMessage() {
+      messageEl.textContent = "";
+      messageEl.className = "message";
+      messageEl.style.display = "none";
+    }
+
+    // Display message function
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = "block";
+      
+      // Auto-hide success messages after 5 seconds
+      if (type === "success") {
+        setTimeout(() => {
+          messageEl.style.display = "none";
+        }, 5000);
+      }
+    }
+
+    // Sign Up function - FIXED
+    window.signup = function () {
+      const name = document.getElementById("signupName").value;
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      
+      // Validation
+      if (!name || !email || !password || !confirmPassword) {
+        showMessage("Please fill in all fields", "error");
+        return;
+      }
+      
+      if (password.length < 6) {
+        showMessage("Password must be at least 6 characters", "error");
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showMessage("Passwords do not match", "error");
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showMessage("Please enter a valid email address", "error");
+        return;
+      }
+      
+      // Show loading state
+      const signupBtn = document.querySelector('#signupForm .btn-primary');
+      const originalText = signupBtn.innerHTML;
+      signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      signupBtn.disabled = true;
+      
+      // Firebase Signup
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Update profile with name
+          return updateProfile(userCredential.user, {
+            displayName: name
+          }).then(() => {
+            showMessage(`Account created successfully! Welcome to HAPPSTRE, ${name}`, "success");
+            
+            // Reset form
+            document.getElementById("signupName").value = "";
+            document.getElementById("signupEmail").value = "";
+            document.getElementById("signupPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
+            
+            // Switch to login form after 2 seconds
+            setTimeout(() => {
+              showLoginForm();
+            }, 2000);
+            
+            // Reset button
+            signupBtn.innerHTML = originalText;
+            signupBtn.disabled = false;
+          });
+        })
+        .catch((error) => {
+          let errorMessage = "An error occurred during signup.";
+          switch(error.code) {
+            case "auth/email-already-in-use":
+              errorMessage = "This email is already registered. Please login instead.";
+              break;
+            case "auth/invalid-email":
+              errorMessage = "Please enter a valid email address.";
+              break;
+            case "auth/weak-password":
+              errorMessage = "Password should be at least 6 characters.";
+              break;
+            case "auth/operation-not-allowed":
+              errorMessage = "Email/password authentication is not enabled. Please check Firebase configuration.";
+              break;
+          }
+          showMessage(errorMessage, "error");
+          
+          // Reset button
+          signupBtn.innerHTML = originalText;
+          signupBtn.disabled = false;
+        });
+    };
+
+    // Login function
+    window.login = function () {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      
+      if (!email || !password) {
+        showMessage("Please enter both email and password", "error");
+        return;
+      }
+      
+      // Show loading state
+      const loginBtn = document.querySelector('#loginForm .btn-primary');
+      const originalText = loginBtn.innerHTML;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+      loginBtn.disabled = true;
+      
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const userName = userCredential.user.displayName || userCredential.user.email;
+          showMessage(`Welcome back to HAPPSTRE, ${userName}!`, "success");
+          
+          // Reset button
+          loginBtn.innerHTML = originalText;
+          loginBtn.disabled = false;
+          
+          // Redirect to dashboard after 2 seconds
+          setTimeout(() => {
+            // window.location.href = "dashboard.html";
+            showMessage("Redirecting to dashboard... (Demo mode)", "success");
+          }, 2000);
+        })
+        .catch((error) => {
+          let errorMessage = "An error occurred during login.";
+          switch(error.code) {
+            case "auth/invalid-email":
+              errorMessage = "Please enter a valid email address.";
+              break;
+            case "auth/user-disabled":
+              errorMessage = "This account has been disabled.";
+              break;
+            case "auth/user-not-found":
+              errorMessage = "No account found with this email. Please sign up first.";
+              break;
+            case "auth/wrong-password":
+              errorMessage = "Incorrect password. Please try again.";
+              break;
+            case "auth/invalid-credential":
+              errorMessage = "Invalid email or password.";
+              break;
+          }
+          showMessage(errorMessage, "error");
+          
+          // Reset button
+          loginBtn.innerHTML = originalText;
+          loginBtn.disabled = false;
+        });
+    };
+
+    // Google Login function
+    window.googleLogin = function () {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          showMessage(`Google authentication successful! Welcome to HAPPSTRE, ${result.user.displayName}`, "success");
+          
+          // Redirect to dashboard after 2 seconds
+          setTimeout(() => {
+            // window.location.href = "dashboard.html";
+            showMessage("Redirecting to dashboard... (Demo mode)", "success");
+          }, 2000);
+        })
+        .catch((error) => {
+          let errorMessage = "An error occurred during Google login.";
+          switch(error.code) {
+            case "auth/popup-closed-by-user":
+              errorMessage = "Google login popup was closed. Please try again.";
+              break;
+            case "auth/unauthorized-domain":
+              errorMessage = "This domain is not authorized for Firebase authentication.";
+              break;
+            case "auth/operation-not-allowed":
+              errorMessage = "Google authentication is not enabled. Please check Firebase configuration.";
+              break;
+          }
+          showMessage(errorMessage, "error");
+        });
+    };
+
+    // Email validation helper
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    // Test Firebase connection on load
+    window.addEventListener('load', () => {
+      console.log("HAPPSTRE Login Page Loaded");
+      console.log("Firebase App:", app.name);
+      console.log("Firebase Auth:", auth.app.name);
+      
+      // Check if Firebase config is set
+      if (firebaseConfig.apiKey.includes("YOUR") || firebaseConfig.apiKey.includes("123456")) {
+        showMessage("⚠️ Please configure Firebase with your own credentials", "error");
+      }
+    });
+  </script>
+</body>
+</html>
