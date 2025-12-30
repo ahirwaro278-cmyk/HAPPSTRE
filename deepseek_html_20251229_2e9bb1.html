@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HappStore | Login & Registration</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 35px;
+        }
+
+        .form-container {
+            width: 100%;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #667eea;
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .toggle-btn.active::after {
+            width: 80%;
+        }
+
+        .form {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            z-index: 2;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+            background: white;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group input.error {
+            border-color: #dc3545;
+        }
+
+        .input-group input.success {
+            border-color: #28a745;
+        }
+
+        .phone-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .country-code {
+            flex: 0 0 100px;
+        }
+
+        .phone-input {
+            flex: 1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 15px;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 2;
+        }
+
+        .captcha-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            min-height: 78px;
+        }
+
+        .g-recaptcha {
+            transform: scale(0.95);
+            transform-origin: 0 0;
+        }
+
+        .wallet-info {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .wallet-info.active {
+            display: block;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5); }
+            100% { box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); }
+        }
+
+        .user-info h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .user-details {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .wallet-card {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .wallet-header h3 {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-balance {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .wallet-address {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: center;
+            word-break: break-all;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .wallet-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .wallet-btn {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallet-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .wallet-btn i {
+            font-size: 1.3rem;
+        }
+
+        .logout-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .validation-message {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .validation-message.error {
+            color: #dc3545;
+            display: block;
+        }
+
+        .validation-message.success {
+            color: #28a745;
+            display: block;
+        }
+
+        .phone-status {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem;
+            display: none;
+            z-index: 2;
+        }
+
+        .phone-status.available {
+            color: #28a745;
+            display: block;
+        }
+
+        .phone-status.taken {
+            color: #dc3545;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .content {
+                padding: 25px 20px;
+            }
+            
+            .g-recaptcha {
+                transform: scale(0.85);
+            }
+            
+            .wallet-actions {
+                flex-direction: column;
+            }
+            
+            .phone-input-container {
+                flex-direction: column;
+            }
+            
+            .country-code, .phone-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-wallet"></i> HappStore</h1>
+            <p>One Account. One Wallet.</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="form-container">
+                <!-- Message Display -->
+                <div id="message" class="message"></div>
+
+                <!-- Toggle Buttons -->
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" data-form="login">Login</button>
+                    <button class="toggle-btn" data-form="register">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="form active">
+                    <div class="form-group">
+                        <label class="form-label">Mobile Number</label>
+                        <div class="phone-input-container">
+                            <div class="input-group country-code">
+                                <select id="login-country-code">
+                                    <option value="+91">+91 IN</option>
+                                    <option value="+1">+1 US</option>
+                                    <option value="+44">+44 UK</option>
+                                </select>
+                            </div>
+                            <div class="input-group phone-input">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="login-phone" placeholder="Enter 10-digit mobile number" required maxlength="10">
+                                <span id="login-phone-status" class="phone-status"></span>
+                            </div>
+                        </div>
+                        <div id="login-phone-validation" class="validation-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="login-password" placeholder="Enter password" required minlength="6">
+                            <button type="button" class="password-toggle" id="login-toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="login-password-validation" class="validation-message"></div>
+                    </div>
+
+                    <!-- CAPTCHA for Login -->
+                    <div class="captcha-container">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onLoginCaptchaSuccess" data-expired-callback="onLoginCaptchaExpired"></div>
+                    </div>
+
+                    <button type="button" class="btn" id="login-btn" disabled>
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+
+                    <div class="footer">
+                        <p>Forgot password? <a href="#" id="forgot-password">Reset here</a></p>
+                    </div>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="register-form" class="form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="register-name" placeholder="Enter your full name" required>
+                        </div>
+                        <div id="register-name-validation" class="validation-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mobile Number</label>
+                        <div class="phone-input-container">
+                            <div class="input-group country-code">
+                                <select id="register-country-code">
+                                    <option value="+91">+91 IN</option>
+                                    <option value="+1">+1 US</option>
+                                    <option value="+44">+44 UK</option>
+                                </select>
+                            </div>
+                            <div class="input-group phone-input">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="register-phone" placeholder="Enter 10-digit mobile number" required maxlength="10">
+                                <span id="register-phone-status" class="phone-status"></span>
+                            </div>
+                        </div>
+                        <div id="register-phone-validation" class="validation-message"></div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                            <i class="fas fa-info-circle"></i> One mobile number can create only one account
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="register-password" placeholder="Create password (min 6 chars)" required minlength="6">
+                            <button type="button" class="password-toggle" id="register-toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="register-password-validation" class="validation-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="register-confirm-password" placeholder="Confirm password" required>
+                        </div>
+                        <div id="register-confirm-validation" class="validation-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Invite Code (Optional)</label>
+                        <div class="input-group">
+                            <i class="fas fa-gift"></i>
+                            <input type="text" id="register-invite-code" placeholder="Enter invite code (if any)">
+                        </div>
+                        <p style="margin-top: 5px; font-size: 0.85rem; color: #666;">
+                            Invite code is optional. Leave blank if you don't have one.
+                        </p>
+                    </div>
+
+                    <!-- CAPTCHA for Registration -->
+                    <div class="captcha-container">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="onRegisterCaptchaSuccess" data-expired-callback="onRegisterCaptchaExpired"></div>
+                    </div>
+
+                    <button type="button" class="btn" id="register-btn" disabled>
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+
+                    <div class="footer">
+                        <p>By registering, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+                    </div>
+                </form>
+
+                <!-- Wallet Dashboard (Shown after login) -->
+                <div id="wallet-info" class="wallet-info">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h2 id="user-name">Welcome</h2>
+                        <div class="user-details">
+                            <p id="user-phone-display"></p>
+                            <p id="user-register-date"></p>
+                        </div>
+                    </div>
+
+                    <div class="wallet-card">
+                        <div class="wallet-header">
+                            <h3><i class="fas fa-wallet"></i> Digital Wallet</h3>
+                            <i class="fas fa-shield-alt" style="font-size: 1.2rem;"></i>
+                        </div>
+                        
+                        <div class="wallet-balance" id="wallet-balance">₹0.00</div>
+                        <div class="wallet-address" id="wallet-address">Loading...</div>
+                    </div>
+                    
+                    <div class="wallet-actions">
+                        <button class="wallet-btn" id="add-money-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add Money</span>
+                        </button>
+                        <button class="wallet-btn" id="send-money-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Money</span>
+                        </button>
+                        <button class="wallet-btn" id="history-btn">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </button>
+                    </div>
+
+                    <div class="logout-container">
+                        <button class="btn btn-secondary" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Application Script -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHhsjrMHSBSC5ex48sbeldwz-gcomUo-U",
+            authDomain: "happstore-f0b33.firebaseapp.com",
+            projectId: "happstore-f0b33",
+            storageBucket: "happstore-f0b33.firebasestorage.app",
+            messagingSenderId: "1027534273548",
+            appId: "1:1027534273548:web:b615b4fdbd699d6e230229"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        let currentUser = null;
+        let userWallet = null;
+        let loginCaptchaVerified = false;
+        let registerCaptchaVerified = false;
+
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            showMessage("Firebase initialization failed. Please refresh the page.", "error");
+        }
+
+        // DOM Elements
+        const messageDiv = document.getElementById('message');
+        
+        // Toggle buttons
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const forms = document.querySelectorAll('.form');
+        
+        // Login form elements
+        const loginForm = document.getElementById('login-form');
+        const loginPhoneInput = document.getElementById('login-phone');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginCountryCode = document.getElementById('login-country-code');
+        const loginBtn = document.getElementById('login-btn');
+        const loginTogglePassword = document.getElementById('login-toggle-password');
+        const loginPhoneStatus = document.getElementById('login-phone-status');
+        const loginPhoneValidation = document.getElementById('login-phone-validation');
+        const loginPasswordValidation = document.getElementById('login-password-validation');
+        
+        // Register form elements
+        const registerForm = document.getElementById('register-form');
+        const registerNameInput = document.getElementById('register-name');
+        const registerPhoneInput = document.getElementById('register-phone');
+        const registerPasswordInput = document.getElementById('register-password');
+        const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
+        const registerInviteCodeInput = document.getElementById('register-invite-code');
+        const registerCountryCode = document.getElementById('register-country-code');
+        const registerBtn = document.getElementById('register-btn');
+        const registerTogglePassword = document.getElementById('register-toggle-password');
+        const registerPhoneStatus = document.getElementById('register-phone-status');
+        const registerPhoneValidation = document.getElementById('register-phone-validation');
+        const registerPasswordValidation = document.getElementById('register-password-validation');
+        const registerConfirmValidation = document.getElementById('register-confirm-validation');
+        const registerNameValidation = document.getElementById('register-name-validation');
+        
+        // Wallet elements
+        const walletInfo = document.getElementById('wallet-info');
+        const userName = document.getElementById('user-name');
+        const userPhoneDisplay = document.getElementById('user-phone-display');
+        const userRegisterDate = document.getElementById('user-register-date');
+        const walletBalance = document.getElementById('wallet-balance');
+        const walletAddress = document.getElementById('wallet-address');
+        const addMoneyBtn = document.getElementById('add-money-btn');
+        const sendMoneyBtn = document.getElementById('send-money-btn');
+        const historyBtn = document.getElementById('history-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            checkAuthState();
+            createDemoInvites();
+        });
+
+        function initializeApp() {
+            // Setup toggle buttons
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const formId = btn.getAttribute('data-form');
+                    
+                    // Update active button
+                    toggleBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Show active form
+                    forms.forEach(form => form.classList.remove('active'));
+                    document.getElementById(`${formId}-form`).classList.add('active');
+                    
+                    // Clear messages
+                    clearMessage();
+                    resetValidation();
+                    
+                    // Reset captcha
+                    if (typeof grecaptcha !== 'undefined') {
+                        grecaptcha.reset();
+                    }
+                });
+            });
+
+            // Password toggle functionality
+            loginTogglePassword.addEventListener('click', () => {
+                togglePasswordVisibility(loginPasswordInput, loginTogglePassword);
+            });
+
+            registerTogglePassword.addEventListener('click', () => {
+                togglePasswordVisibility(registerPasswordInput, registerTogglePassword);
+            });
+
+            // Real-time phone validation for registration
+            registerPhoneInput.addEventListener('input', () => {
+                validateRegisterPhone();
+            });
+
+            // Real-time password validation
+            registerPasswordInput.addEventListener('input', () => {
+                validateRegisterPassword();
+            });
+
+            registerConfirmPasswordInput.addEventListener('input', () => {
+                validateRegisterConfirmPassword();
+            });
+
+            // Real-time name validation
+            registerNameInput.addEventListener('input', () => {
+                validateRegisterName();
+            });
+
+            // Phone input validation for login
+            loginPhoneInput.addEventListener('input', () => {
+                validateLoginPhone();
+            });
+
+            loginPasswordInput.addEventListener('input', () => {
+                validateLoginPassword();
+            });
+
+            // Login button
+            loginBtn.addEventListener('click', loginUser);
+
+            // Register button
+            registerBtn.addEventListener('click', registerUser);
+
+            // Wallet buttons
+            addMoneyBtn.addEventListener('click', addMoney);
+            sendMoneyBtn.addEventListener('click', sendMoney);
+            historyBtn.addEventListener('click', showHistory);
+            logoutBtn.addEventListener('click', logoutUser);
+
+            // Forgot password
+            document.getElementById('forgot-password').addEventListener('click', function(e) {
+                e.preventDefault();
+                showMessage('Password reset feature coming soon!', 'info');
+            });
+
+            // Enter key support
+            setupEnterKeySupport();
+        }
+
+        // CAPTCHA Callbacks
+        window.onLoginCaptchaSuccess = function() {
+            loginCaptchaVerified = true;
+            loginBtn.disabled = false;
+            showValidationMessage(loginPhoneValidation, "CAPTCHA verified ✓", "success");
+        }
+
+        window.onLoginCaptchaExpired = function() {
+            loginCaptchaVerified = false;
+            loginBtn.disabled = true;
+            showValidationMessage(loginPhoneValidation, "CAPTCHA expired. Please verify again.", "error");
+        }
+
+        window.onRegisterCaptchaSuccess = function() {
+            registerCaptchaVerified = true;
+            registerBtn.disabled = false;
+            showValidationMessage(registerPhoneValidation, "CAPTCHA verified ✓", "success");
+        }
+
+        window.onRegisterCaptchaExpired = function() {
+            registerCaptchaVerified = false;
+            registerBtn.disabled = true;
+            showValidationMessage(registerPhoneValidation, "CAPTCHA expired. Please verify again.", "error");
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility(passwordInput, toggleBtn) {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = toggleBtn.querySelector('i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+
+        // Show message
+        function showMessage(text, type = 'info') {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            // Auto hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Clear message
+        function clearMessage() {
+            messageDiv.style.display = 'none';
+        }
+
+        // Show validation message
+        function showValidationMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `validation-message ${type}`;
+            element.style.display = 'block';
+        }
+
+        // Clear validation message
+        function clearValidationMessage(element) {
+            element.textContent = '';
+            element.className = 'validation-message';
+            element.style.display = 'none';
+        }
+
+        // Reset all validation messages
+        function resetValidation() {
+            [loginPhoneValidation, loginPasswordValidation, registerNameValidation, 
+             registerPhoneValidation, registerPasswordValidation, registerConfirmValidation]
+                .forEach(clearValidationMessage);
+            
+            [loginPhoneStatus, registerPhoneStatus].forEach(el => {
+                el.className = 'phone-status';
+                el.textContent = '';
+            });
+        }
+
+        // Validate login phone
+        function validateLoginPhone() {
+            const phone = loginPhoneInput.value.trim();
+            
+            if (!phone) {
+                loginPhoneInput.classList.remove('success', 'error');
+                clearValidationMessage(loginPhoneValidation);
+                loginPhoneStatus.className = 'phone-status';
+                return false;
+            }
+            
+            if (!/^\d{10}$/.test(phone)) {
+                loginPhoneInput.classList.add('error');
+                loginPhoneInput.classList.remove('success');
+                showValidationMessage(loginPhoneValidation, "Please enter a valid 10-digit mobile number", "error");
+                loginPhoneStatus.className = 'phone-status';
+                return false;
+            }
+            
+            loginPhoneInput.classList.add('success');
+            loginPhoneInput.classList.remove('error');
+            clearValidationMessage(loginPhoneValidation);
+            loginPhoneStatus.className = 'phone-status available';
+            loginPhoneStatus.textContent = "✓";
+            return true;
+        }
+
+        // Validate login password
+        function validateLoginPassword() {
+            const password = loginPasswordInput.value;
+            
+            if (!password) {
+                loginPasswordInput.classList.remove('success', 'error');
+                clearValidationMessage(loginPasswordValidation);
+                return false;
+            }
+            
+            if (password.length < 6) {
+                loginPasswordInput.classList.add('error');
+                loginPasswordInput.classList.remove('success');
+                showValidationMessage(loginPasswordValidation, "Password must be at least 6 characters", "error");
+                return false;
+            }
+            
+            loginPasswordInput.classList.add('success');
+            loginPasswordInput.classList.remove('error');
+            clearValidationMessage(loginPasswordValidation);
+            return true;
+        }
+
+        // Validate register name
+        function validateRegisterName() {
+            const name = registerNameInput.value.trim();
+            
+            if (!name) {
+                registerNameInput.classList.remove('success', 'error');
+                clearValidationMessage(registerNameValidation);
+                return false;
+            }
+            
+            if (name.length < 2) {
+                registerNameInput.classList.add('error');
+                registerNameInput.classList.remove('success');
+                showValidationMessage(registerNameValidation, "Name must be at least 2 characters", "error");
+                return false;
+            }
+            
+            registerNameInput.classList.add('success');
+            registerNameInput.classList.remove('error');
+            clearValidationMessage(registerNameValidation);
+            return true;
+        }
+
+        // Validate register phone
+        async function validateRegisterPhone() {
+            const countryCode = registerCountryCode.value;
+            const phone = registerPhoneInput.value.trim();
+            
+            if (!phone) {
+                registerPhoneInput.classList.remove('success', 'error');
+                clearValidationMessage(registerPhoneValidation);
+                registerPhoneStatus.className = 'phone-status';
+                return false;
+            }
+            
+            if (!/^\d{10}$/.test(phone)) {
+                registerPhoneInput.classList.add('error');
+                registerPhoneInput.classList.remove('success');
+                showValidationMessage(registerPhoneValidation, "Please enter a valid 10-digit mobile number", "error");
+                registerPhoneStatus.className = 'phone-status';
+                return false;
+            }
+            
+            // Check if phone already exists
+            try {
+                if (!db) {
+                    throw new Error("Database not initialized");
+                }
+                
+                const usersRef = db.collection('users');
+                const querySnapshot = await usersRef
+                    .where('phone', '==', `${countryCode}${phone}`)
+                    .limit(1)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    registerPhoneInput.classList.add('error');
+                    registerPhoneInput.classList.remove('success');
+                    showValidationMessage(registerPhoneValidation, "This mobile number is already registered", "error");
+                    registerPhoneStatus.className = 'phone-status taken';
+                    registerPhoneStatus.textContent = "✗";
+                    return false;
+                }
+                
+                registerPhoneInput.classList.add('success');
+                registerPhoneInput.classList.remove('error');
+                showValidationMessage(registerPhoneValidation, "Mobile number available ✓", "success");
+                registerPhoneStatus.className = 'phone-status available';
+                registerPhoneStatus.textContent = "✓";
+                return true;
+                
+            } catch (error) {
+                console.error('Error checking phone:', error);
+                showValidationMessage(registerPhoneValidation, "Error checking phone availability", "error");
+                return false;
+            }
+        }
+
+        // Validate register password
+        function validateRegisterPassword() {
+            const password = registerPasswordInput.value;
+            
+            if (!password) {
+                registerPasswordInput.classList.remove('success', 'error');
+                clearValidationMessage(registerPasswordValidation);
+                return false;
+            }
+            
+            if (password.length < 6) {
+                registerPasswordInput.classList.add('error');
+                registerPasswordInput.classList.remove('success');
+                showValidationMessage(registerPasswordValidation, "Password must be at least 6 characters", "error");
+                return false;
+            }
+            
+            registerPasswordInput.classList.add('success');
+            registerPasswordInput.classList.remove('error');
+            clearValidationMessage(registerPasswordValidation);
+            return true;
+        }
+
+        // Validate confirm password
+        function validateRegisterConfirmPassword() {
+            const password = registerPasswordInput.value;
+            const confirmPassword = registerConfirmPasswordInput.value;
+            
+            if (!confirmPassword) {
+                registerConfirmPasswordInput.classList.remove('success', 'error');
+                clearValidationMessage(registerConfirmValidation);
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                registerConfirmPasswordInput.classList.add('error');
+                registerConfirmPasswordInput.classList.remove('success');
+                showValidationMessage(registerConfirmValidation, "Passwords do not match", "error");
+                return false;
+            }
+            
+            registerConfirmPasswordInput.classList.add('success');
+            registerConfirmPasswordInput.classList.remove('error');
+            showValidationMessage(registerConfirmValidation, "Passwords match ✓", "success");
+            return true;
+        }
+
+        // Setup enter key support
+        function setupEnterKeySupport() {
+            const inputs = [
+                {input: loginPhoneInput, action: loginUser},
+                {input: loginPasswordInput, action: loginUser},
+                {input: registerNameInput, action: registerUser},
+                {input: registerPhoneInput, action: registerUser},
+                {input: registerPasswordInput, action: registerUser},
+                {input: registerConfirmPasswordInput, action: registerUser},
+                {input: registerInviteCodeInput, action: registerUser}
+            ];
+            
+            inputs.forEach(({input, action}) => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        action();
+                    }
+                });
+            });
+        }
+
+        // Login user - FIXED VERSION
+        async function loginUser() {
+            // Validate all fields
+            if (!validateLoginPhone() || !validateLoginPassword()) {
+                showMessage('Please fix the errors above', 'error');
+                return;
+            }
+            
+            if (!loginCaptchaVerified) {
+                showMessage('Please verify CAPTCHA', 'error');
+                return;
+            }
+            
+            const countryCode = loginCountryCode.value;
+            const phone = loginPhoneInput.value.trim();
+            const password = loginPasswordInput.value;
+            const fullPhone = `${countryCode}${phone}`;
+            
+            showMessage('Logging in...', 'info');
+            
+            try {
+                if (!db) {
+                    throw new Error("Database not initialized");
+                }
+                
+                console.log("Searching for user with phone:", fullPhone);
+                
+                // Check if user exists
+                const usersRef = db.collection('users');
+                const querySnapshot = await usersRef
+                    .where('phone', '==', fullPhone)
+                    .limit(1)
+                    .get();
+                
+                console.log("Query result:", querySnapshot.empty ? "No user found" : "User found");
+                
+                if (querySnapshot.empty) {
+                    showMessage('User not found. Please register first.', 'error');
+                    return;
+                }
+                
+                // Get user data
+                let userDoc;
+                let userData;
+                querySnapshot.forEach(doc => {
+                    userDoc = doc;
+                    userData = doc.data();
+                });
+                
+                console.log("User data found:", userData);
+                
+                // Check password
+                if (!userData.password) {
+                    showMessage('Account error: Password not found', 'error');
+                    return;
+                }
+                
+                if (password !== userData.password) {
+                    showMessage('Incorrect password', 'error');
+                    return;
+                }
+                
+                // Update last login
+                try {
+                    await userDoc.ref.update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (updateError) {
+                    console.warn("Could not update last login:", updateError);
+                    // Continue even if update fails
+                }
+                
+                // Convert Firestore timestamp to Date object
+                if (userData.createdAt && userData.createdAt.toDate) {
+                    userData.createdAt = userData.createdAt.toDate();
+                } else if (userData.createdAt && typeof userData.createdAt === 'string') {
+                    userData.createdAt = new Date(userData.createdAt);
+                }
+                
+                // Set current user
+                currentUser = {
+                    uid: userDoc.id,
+                    ...userData
+                };
+                
+                console.log("Current user set:", currentUser);
+                
+                // Save to localStorage
+                localStorage.setItem('happstore_user', JSON.stringify(currentUser));
+                
+                // Show wallet dashboard
+                showWalletDashboard();
+                
+                // Clear form
+                loginPhoneInput.value = '';
+                loginPasswordInput.value = '';
+                loginPhoneInput.classList.remove('success');
+                loginPasswordInput.classList.remove('success');
+                
+                // Reset CAPTCHA
+                loginCaptchaVerified = false;
+                if (typeof grecaptcha !== 'undefined') {
+                    grecaptcha.reset();
+                }
+                
+                showMessage('Login successful! Welcome back!', 'success');
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Login failed: ' + error.message, 'error');
+            }
+        }
+
+        // Register user - FIXED VERSION
+        async function registerUser() {
+            // Validate all fields
+            const isNameValid = validateRegisterName();
+            const isPhoneValid = await validateRegisterPhone();
+            const isPasswordValid = validateRegisterPassword();
+            const isConfirmValid = validateRegisterConfirmPassword();
+            
+            if (!isNameValid || !isPhoneValid || !isPasswordValid || !isConfirmValid) {
+                showMessage('Please fix the errors above', 'error');
+                return;
+            }
+            
+            if (!registerCaptchaVerified) {
+                showMessage('Please verify CAPTCHA', 'error');
+                return;
+            }
+            
+            const name = registerNameInput.value.trim();
+            const countryCode = registerCountryCode.value;
+            const phone = registerPhoneInput.value.trim();
+            const password = registerPasswordInput.value;
+            const inviteCode = registerInviteCodeInput.value.trim().toUpperCase() || null;
+            const fullPhone = `${countryCode}${phone}`;
+            
+            showMessage('Creating your account...', 'info');
+            
+            try {
+                if (!db) {
+                    throw new Error("Database not initialized");
+                }
+                
+                // Double-check phone doesn't exist
+                const usersRef = db.collection('users');
+                const phoneCheck = await usersRef
+                    .where('phone', '==', fullPhone)
+                    .limit(1)
+                    .get();
+                
+                if (!phoneCheck.empty) {
+                    showMessage('This phone number is already registered', 'error');
+                    return;
+                }
+                
+                // Generate wallet address
+                const walletAddress = generateWalletAddress();
+                
+                // Create user document
+                const userData = {
+                    name: name,
+                    phone: fullPhone,
+                    password: password,
+                    inviteCode: inviteCode,
+                    walletAddress: walletAddress,
+                    walletBalance: 1000, // Starting bonus
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                console.log("Creating user with data:", userData);
+                
+                const userRef = await db.collection('users').add(userData);
+                
+                console.log("User created with ID:", userRef.id);
+                
+                // Mark invite code as used if provided
+                if (inviteCode) {
+                    try {
+                        const inviteRef = db.collection('invites').doc(inviteCode);
+                        const inviteDoc = await inviteRef.get();
+                        
+                        if (inviteDoc.exists) {
+                            await inviteRef.update({
+                                used: true,
+                                usedBy: userRef.id,
+                                usedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                usedCount: firebase.firestore.FieldValue.increment(1)
+                            });
+                            console.log("Invite code marked as used:", inviteCode);
+                        }
+                    } catch (inviteError) {
+                        console.error('Error updating invite code:', inviteError);
+                        // Continue even if invite code update fails
+                    }
+                }
+                
+                // Set current user
+                currentUser = {
+                    uid: userRef.id,
+                    ...userData
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('happstore_user', JSON.stringify(currentUser));
+                
+                // Clear form
+                registerNameInput.value = '';
+                registerPhoneInput.value = '';
+                registerPasswordInput.value = '';
+                registerConfirmPasswordInput.value = '';
+                registerInviteCodeInput.value = '';
+                
+                // Reset validation classes
+                [registerNameInput, registerPhoneInput, registerPasswordInput, registerConfirmPasswordInput]
+                    .forEach(input => input.classList.remove('success'));
+                
+                // Switch to login form
+                toggleBtns.forEach(btn => btn.classList.remove('active'));
+                toggleBtns[0].classList.add('active');
+                forms.forEach(form => form.classList.remove('active'));
+                loginForm.classList.add('active');
+                
+                // Reset CAPTCHA
+                registerCaptchaVerified = false;
+                if (typeof grecaptcha !== 'undefined') {
+                    grecaptcha.reset();
+                }
+                
+                // Show wallet dashboard
+                showWalletDashboard();
+                
+                showMessage('Account created successfully! Welcome to HappStore!', 'success');
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Registration failed: ' + error.message, 'error');
+            }
+        }
+
+        // Generate wallet address
+        function generateWalletAddress() {
+            const chars = '0123456789ABCDEF';
+            let address = 'HAPP';
+            for (let i = 0; i < 16; i++) {
+                address += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return address;
+        }
+
+        // Show wallet dashboard
+        function showWalletDashboard() {
+            if (!currentUser) {
+                console.error("Cannot show dashboard: currentUser is null");
+                return;
+            }
+            
+            console.log("Showing dashboard for user:", currentUser);
+            
+            // Hide login/register forms
+            forms.forEach(form => {
+                form.style.display = 'none';
+                form.classList.remove('active');
+            });
+            toggleBtns.forEach(btn => btn.style.display = 'none');
+            
+            // Show wallet info
+            walletInfo.style.display = 'block';
+            walletInfo.classList.add('active');
+            
+            // Update user info
+            userName.textContent = `Welcome, ${currentUser.name || 'User'}!`;
+            userPhoneDisplay.textContent = `📱 ${currentUser.phone || 'No phone'}`;
+            
+            // Format registration date
+            if (currentUser.createdAt) {
+                let date;
+                if (currentUser.createdAt.toDate) {
+                    date = currentUser.createdAt.toDate();
+                } else if (currentUser.createdAt instanceof Date) {
+                    date = currentUser.createdAt;
+                } else {
+                    date = new Date(currentUser.createdAt);
+                }
+                userRegisterDate.textContent = `Member since ${date.toLocaleDateString('en-IN')}`;
+            } else {
+                userRegisterDate.textContent = 'New member';
+            }
+            
+            // Update wallet info
+            walletBalance.textContent = `₹${(currentUser.walletBalance || 0).toLocaleString('en-IN')}`;
+            walletAddress.textContent = currentUser.walletAddress || 'HAPP' + Math.random().toString(36).substr(2, 16).toUpperCase();
+        }
+
+        // Check authentication state
+        function checkAuthState() {
+            const savedUser = localStorage.getItem('happstore_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    console.log("Loaded user from localStorage:", currentUser);
+                    
+                    // Check if we have database access
+                    if (db) {
+                        // Verify user still exists in database
+                        db.collection('users').doc(currentUser.uid).get()
+                            .then(doc => {
+                                if (doc.exists) {
+                                    showWalletDashboard();
+                                } else {
+                                    console.log("User no longer exists in database");
+                                    localStorage.removeItem('happstore_user');
+                                    currentUser = null;
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error checking user:", error);
+                                // Still show dashboard from localStorage data
+                                showWalletDashboard();
+                            });
+                    } else {
+                        // Show from localStorage if no database
+                        showWalletDashboard();
+                    }
+                } catch (error) {
+                    console.error('Error parsing saved user:', error);
+                    localStorage.removeItem('happstore_user');
+                }
+            }
+        }
+
+        // Wallet functions
+        function addMoney() {
+            if (!currentUser) {
+                showMessage('Please login first', 'error');
+                return;
+            }
+            
+            const amount = prompt('Enter amount to add:');
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            // Update wallet balance
+            currentUser.walletBalance = (currentUser.walletBalance || 0) + parseFloat(amount);
+            walletBalance.textContent = `₹${currentUser.walletBalance.toLocaleString('en-IN')}`;
+            
+            // Save to localStorage
+            localStorage.setItem('happstore_user', JSON.stringify(currentUser));
+            
+            // Update in Firestore
+            if (db && currentUser.uid) {
+                db.collection('users').doc(currentUser.uid).update({
+                    walletBalance: currentUser.walletBalance
+                }).catch(error => {
+                    console.error('Error updating wallet balance:', error);
+                });
+            }
+            
+            showMessage(`₹${amount} added to your wallet successfully!`, 'success');
+        }
+
+        function sendMoney() {
+            if (!currentUser) {
+                showMessage('Please login first', 'error');
+                return;
+            }
+            
+            const amount = prompt('Enter amount to send:');
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            if (parseFloat(amount) > (currentUser.walletBalance || 0)) {
+                showMessage('Insufficient balance', 'error');
+                return;
+            }
+            
+            const walletAddress = prompt('Enter recipient wallet address (HAPPxxxxxxxxxxxxxxxx):');
+            if (!walletAddress || walletAddress.length !== 20 || !walletAddress.startsWith('HAPP')) {
+                showMessage('Please enter a valid HAPP wallet address', 'error');
+                return;
+            }
+            
+            // Update wallet balance
+            currentUser.walletBalance = (currentUser.walletBalance || 0) - parseFloat(amount);
+            walletBalance.textContent = `₹${currentUser.walletBalance.toLocaleString('en-IN')}`;
+            
+            // Save to localStorage
+            localStorage.setItem('happstore_user', JSON.stringify(currentUser));
+            
+            // Update in Firestore
+            if (db && currentUser.uid) {
+                db.collection('users').doc(currentUser.uid).update({
+                    walletBalance: currentUser.walletBalance
+                }).catch(error => {
+                    console.error('Error updating wallet balance:', error);
+                });
+            }
+            
+            showMessage(`₹${amount} sent to ${walletAddress} successfully!`, 'success');
+        }
+
+        function showHistory() {
+            showMessage('Transaction history feature will be available soon!', 'info');
+        }
+
+        // Logout user
+        function logoutUser() {
+            currentUser = null;
+            
+            // Clear localStorage
+            localStorage.removeItem('happstore_user');
+            
+            // Show login form
+            walletInfo.style.display = 'none';
+            walletInfo.classList.remove('active');
+            forms.forEach(form => {
+                form.style.display = 'block';
+                form.classList.remove('active');
+            });
+            loginForm.classList.add('active');
+            
+            toggleBtns.forEach(btn => btn.style.display = 'flex');
+            
+            // Reset validation
+            resetValidation();
+            
+            // Clear form inputs
+            loginPhoneInput.value = '';
+            loginPasswordInput.value = '';
+            
+            showMessage('Logged out successfully', 'success');
+        }
+
+        // Create demo invite codes
+        async function createDemoInvites() {
+            if (!db) {
+                console.log("Database not available for creating demo invites");
+                return;
+            }
+            
+            try {
+                const demoInvites = [
+                    {code: 'HAPP2024', maxUses: 100},
+                    {code: 'STORE123', maxUses: 50},
+                    {code: 'WELCOME50', maxUses: 200},
+                    {code: 'NEWUSER99', maxUses: 100}
+                ];
+                
+                for (const invite of demoInvites) {
+                    const inviteRef = db.collection('invites').doc(invite.code);
+                    const inviteDoc = await inviteRef.get();
+                    
+                    if (!inviteDoc.exists) {
+                        await inviteRef.set({
+                            code: invite.code,
+                            createdBy: 'system',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            used: false,
+                            usedCount: 0,
+                            maxUses: invite.maxUses
+                        });
+                        console.log(`Created demo invite: ${invite.code}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating demo invites:', error);
+            }
+        }
+
+        // Debug function to check database
+        window.debugDatabase = async function() {
+            if (!db) {
+                console.log("Database not initialized");
+                return;
+            }
+            
+            try {
+                const usersRef = db.collection('users');
+                const snapshot = await usersRef.get();
+                console.log("Total users in database:", snapshot.size);
+                snapshot.forEach(doc => {
+                    console.log("User:", doc.id, "=>", doc.data());
+                });
+            } catch (error) {
+                console.error("Debug error:", error);
+            }
+        }
+
+        // Test login function
+        window.testLogin = function() {
+            loginPhoneInput.value = "1234567890";
+            loginPasswordInput.value = "password123";
+            validateLoginPhone();
+            validateLoginPassword();
+            onLoginCaptchaSuccess();
+        }
+
+        // Test registration function
+        window.testRegister = function() {
+            const randomPhone = Math.floor(1000000000 + Math.random() * 9000000000);
+            registerNameInput.value = "Test User";
+            registerPhoneInput.value = randomPhone.toString();
+            registerPasswordInput.value = "password123";
+            registerConfirmPasswordInput.value = "password123";
+            registerInviteCodeInput.value = "HAPP2024";
+            validateRegisterName();
+            validateRegisterPhone();
+            validateRegisterPassword();
+            validateRegisterConfirmPassword();
+            onRegisterCaptchaSuccess();
+        }
+    </script>
+</body>
+</html>
